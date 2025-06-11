@@ -1,9 +1,14 @@
-// authRoutes.js
 const express = require('express');
 const router = express.Router();
-const DokterController = require('../Controller/DokterController.js')
+const DokterController = require('../Controller/DokterController.js');
 const { authMiddleware, adminMiddleware } = require('../middleware/Authmiddleware.js');
 
-router.post('/create', authMiddleware,DokterController.createJadwal);
-router.get('/getjadwal',  authMiddleware, DokterController.getAllJadwal);
+// api dokter
+router.post('/createdokter', authMiddleware, adminMiddleware, DokterController.createDokter);
+router.get('/getdokter', authMiddleware, adminMiddleware, DokterController.getSemuaDokter);
+router.put('/:id', authMiddleware, adminMiddleware, DokterController.UpdateDokter);
+router.delete('/:id', authMiddleware, adminMiddleware, DokterController.DeleteDokter);
+
+// api pasien
+
 module.exports = router;

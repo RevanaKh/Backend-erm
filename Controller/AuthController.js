@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const authController = {
   register: async (req, res) => {
     try {
-      const { nama, nik , email,password,jenis_kelamin,alamat,tempat_lahir,tanggal_lahir,} = req.body;
+      const { nama, nik, email, password, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir } = req.body;
 
       // Check if user exists
       const existingUser = await User.findByEmail(email);
@@ -14,7 +14,7 @@ const authController = {
       }
 
       // Hash password
-      const salt = await bcrypt.genSalt(10)
+      const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
       // Create user
@@ -23,8 +23,11 @@ const authController = {
         nik,
         email,
         password: hashedPassword,
-        jenis_kelamin,alamat,tempat_lahir,tanggal_lahir,
-        role: 'pasien', 
+        jenis_kelamin,
+        alamat,
+        tempat_lahir,
+        tanggal_lahir,
+        role: 'pasien',
       });
 
       // Create token
@@ -51,10 +54,18 @@ const authController = {
       if (!isMatch) {
         return res.status(400).json({ message: 'email atau password salah' });
       }
+      const payload = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      };
 
-      // Create token
-      const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
-
+      if (user.role === 'dokter') {
+        payload.poli = user.poli;
+      }
+      const token = jwt.sign(payload, process.env.JWT_SECRET || 'your_jwt_secret', {
+        expiresIn: '1h',
+      });
       res.json({
         success: true,
         token,
@@ -63,10 +74,12 @@ const authController = {
           name: user.name,
           email: user.email,
           role: user.role,
+          ...(user.role === 'dokter' && { poli: user.poli }),
         },
       });
     } catch (err) {
       res.status(500).json({ message: err.message });
+      console.error({ message: err.message });
     }
   },
 
@@ -79,7 +92,18 @@ const authController = {
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
-      res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
+      const responseUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+
+      if (user.role === 'dokter') {
+        responseUser.poli = user.poli;
+      }
+
+      res.json(responseUser);
     } catch (err) {
       console.error('❌ Error getMe:', err.message);
       res.status(500).json({ message: err.message });
@@ -92,6 +116,29 @@ const authController = {
     } catch (err) {
       console.error('❌ Logout error:', err.message);
       res.status(500).json({ message: 'Logout failed' });
+    }
+  },
+  getuserByid: async (req, res) => {
+    try {
+      const user = await User.getuserByid(req.user.id);
+      res.json(user);
+    } catch (err) {
+      console.error({ message: err.message });
+      res.status(500).json({ message: err.message });
+    }
+  },
+  updateUserid: async (req, res) => {
+    try {
+      const id = req.user.id;
+
+      if (!id) {
+        return res.status(401).json({ message: 'missing id' });
+      }
+
+      const user = await User.updateUserid(id, req.body);
+      res.json(user);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
   },
 };

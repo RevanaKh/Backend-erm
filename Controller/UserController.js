@@ -1,5 +1,7 @@
 const User = require('../Models/Users.js');
-const db = require('../Config/db.js')
+const db = require('../Config/db.js');
+const bcrypt = require('bcryptjs');
+
 const userController = {
   getAllUsers: async (req, res) => {
     try {
@@ -9,15 +11,15 @@ const userController = {
       res.status(500).json({ message: err.message });
     }
   },
-getuserbyid: async (req , res) => {
-  try {
-    const {id} =req.params
-    const usersid = await User.getuserByid(id)
-    res.json(usersid)
-  } catch (err) {
+  getuserbyid: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const usersid = await User.getuserByid(id);
+      res.json(usersid);
+    } catch (err) {
       res.status(500).json({ message: err.message });
-  }
-},
+    }
+  },
   updateUser: async (req, res) => {
     try {
       const { id } = req.params;
@@ -27,18 +29,18 @@ getuserbyid: async (req , res) => {
       res.status(500).json({ message: err.message });
     }
   },
-searchByNIK: async (req, res) => {
-  const { nik } = req.query;  
-  try {
-    const [rows] = await db.query('SELECT * FROM users WHERE nik = ?', [nik]);
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'Pasien tidak ditemukan' });
+  searchByNIK: async (req, res) => {
+    const { nik } = req.query;
+    try {
+      const [rows] = await db.query('SELECT * FROM users WHERE nik = ?', [nik]);
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'Pasien tidak ditemukan' });
+      }
+      res.json(rows);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-    res.json(rows); // kembalikan array agar konsisten
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-},
+  },
 
   deleteUser: async (req, res) => {
     try {
@@ -51,41 +53,41 @@ searchByNIK: async (req, res) => {
   },
   createpasien: async (req, res) => {
     try {
-      const { nama, nik , email,password,jenis_kelamin,alamat,tempat_lahir,tanggal_lahir,} = req.body;
+      const { nama, nik, email, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir } = req.body;
 
-      // Check if user exists
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'Pengguna sudah ada' });
       }
 
-  
+      const hashedPassword = await bcrypt.hash(process.env.PASSWORD_PASIEN, 10);
 
-      // Create user
       const user = await User.create({
         nama,
         nik,
         email,
-        password: 'pasien123',
-        jenis_kelamin,alamat,tempat_lahir,tanggal_lahir,
-        role: 'pasien', 
+        password: hashedPassword,
+        jenis_kelamin,
+        alamat,
+        tempat_lahir,
+        tanggal_lahir,
+        role: 'pasien',
       });
 
-res.status(201).json({
-  message: 'Pasien berhasil ditambahkan',
-  user: {
-    id: user.id,
-    nama: user.nama,
-    nik: user.nik,
-    email: user.email,
-    role: user.role
-  }
-});
-
+      res.status(201).json({
+        message: 'Pasien berhasil ditambahkan',
+        user: {
+          id: user.id,
+          nama: user.nama,
+          nik: user.nik,
+          email: user.email,
+          role: user.role,
+        },
+      });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
-}
+  },
 };
 
 module.exports = userController;

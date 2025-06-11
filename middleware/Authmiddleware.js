@@ -20,5 +20,24 @@ const adminMiddleware = (req, res, next) => {
   }
   next();
 };
+const dokterMiddleware = (req, res, next) => {
+  if (req.user.role !== 'dokter') {
+    return res.status(403).json({ message: 'Access denied. Dokter only.' });
+  }
+  next();
+};
+const ApotekerMiddleware = (req, res, next) => {
+  if (req.user.role !== 'apoteker') {
+    return res.status(403).json({ message: 'Access denied. Dokter only.' });
+  }
+  next();
+};
+const AdminOrApotekerDokterMiddleware = (req, res, next) => {
+  const role = req.user.role;
+  if (role !== 'admin' && role !== 'apoteker' && role !== 'dokter') {
+    return res.status(403).json({ message: 'Access denied. Admin or Apoteker , dokter only.' });
+  }
+  next();
+};
 
-module.exports = { authMiddleware, adminMiddleware };
+module.exports = { authMiddleware, adminMiddleware, dokterMiddleware, ApotekerMiddleware, AdminOrApotekerDokterMiddleware };
