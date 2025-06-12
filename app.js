@@ -9,7 +9,7 @@ const ObatRoutes = require('./Routes/ObatRoutes.js');
 const PasienRoutes = require('./Routes/PasienRoutes.js');
 const app = express();
 const corsOptions = {
-  origin: ['http://192.168.100.230:3000', 'http://localhost:3000'],
+  origin: ['http://192.168.100.230:3000', 'http://localhost:3000' ,'https://erm-6iws.vercel.app/'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   credentials: true,
 };
