@@ -3,7 +3,7 @@ require('dotenv').config();
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST|| 'switchyard.proxy.rlwy.net',
+  host: process.env.DB_HOST,
   user: 'root',
   password: process.env.DB_PASSWORD ,
   database: process.env.DB_NAME ,
@@ -11,7 +11,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  ssl: false,  
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : null,  
 });
 
 async function testConnection() {
