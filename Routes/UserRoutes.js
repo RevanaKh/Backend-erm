@@ -6,6 +6,7 @@ const { authMiddleware, adminMiddleware } = require('../middleware/Authmiddlewar
 
 router.get('/', authMiddleware, adminMiddleware, userController.getAllUsers);
 router.post('/createpasien', authMiddleware, adminMiddleware, userController.createpasien);
+router.post('/createuser', authMiddleware, adminMiddleware, userController.createUsers);
 router.get('/search', authMiddleware, adminMiddleware, userController.searchByNIK);
 router.get('/:id', authMiddleware, adminMiddleware, userController.getuserbyid);
 router.put('/:id', authMiddleware, adminMiddleware, userController.updateUser);

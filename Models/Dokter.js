@@ -29,5 +29,14 @@ class Dokter {
       throw new Error('Gagal mengambil data dokter');
     }
   }
+   static async checkUserid(id) {
+   const [rows] = await db.query('SELECT * FROM dokter WHERE user_id = ?' ,[id])
+   return rows
+  }
+  static async updateDokterPoli(id, dokter) {
+    const { poli } = dokter;
+    await db.query(`UPDATE  dokter SET  poli = ?  WHERE user_id = ?`, [ poli ,id]);
+    return { id, ...dokter };
+  }
 }
 module.exports = Dokter;

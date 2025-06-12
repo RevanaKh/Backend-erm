@@ -75,5 +75,7 @@ class Users {
     await db.query('DELETE FROM users WHERE id = ?', [id]);
     return true;
   }
+  
+ 
 }
 module.exports = Users;

@@ -1,7 +1,8 @@
 const User = require('../Models/Users.js');
 const db = require('../Config/db.js');
 const bcrypt = require('bcryptjs');
-
+const Dokter = require('../Models/Dokter.js')
+const Apoteker = require('../Models/Apoteker.js')
 const userController = {
   getAllUsers: async (req, res) => {
     try {
@@ -85,6 +86,79 @@ const userController = {
         },
       });
     } catch (err) {
+      console.log(err)
+      res.status(500).json({ message: err.message });
+    }
+  },
+  createUsers: async (req, res) => {
+    try {
+      const { nama, nik, email, password,jenis_kelamin, alamat, tempat_lahir, tanggal_lahir ,role ,poli } = req.body;
+
+      const existingUser = await User.findByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Pengguna sudah ada' });
+      }
+      
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      const user = await User.create({
+        nama,
+        nik,
+        email,
+        password: hashedPassword,
+        jenis_kelamin,
+        alamat,
+        tempat_lahir,
+        tanggal_lahir,
+        role,
+      });
+      if (role === 'apoteker') {
+const CreatedApoteker = await Apoteker.CreateApoteker({
+  user_id : user.id ,
+  nama,
+  email,
+  password,
+})
+      }
+      if (role === 'dokter') {
+      const checkDokter = await Dokter.checkUserid(user.id);
+
+      if (checkDokter.length > 0) {
+        const updated = await Dokter.updateDokterPoli(user.id, { poli });
+        return res.status(200).json({
+          message: 'Update dokter berhasil',
+          status: true,
+          data: updated
+        });
+      } else {
+        const created = await Dokter.CreateDokter({
+          user_id: user.id,
+          nama,
+          email,
+          password: hashedPassword,
+          poli,
+          role
+        });
+        return res.status(200).json({
+          message: 'Tambah dokter berhasil',
+          status: true,
+          data: created
+        });
+      }
+    }
+      res.status(201).json({
+        message: 'User berhasil ditambahkan',
+        status: true,
+        user: {
+          id: user.id,
+          nama: user.nama,
+          nik: user.nik,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } catch (err) {
+      console.error(err)
       res.status(500).json({ message: err.message });
     }
   },
