@@ -15,7 +15,7 @@ origin: [
   'https://erm-6iws.vercel.app',
   'https://erm-theta.vercel.app'
 ],
-// 
+
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   credentials: true,
 };

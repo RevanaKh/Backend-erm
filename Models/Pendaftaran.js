@@ -161,7 +161,7 @@ WHERE p.email = ?
     const { id_pendaftaran, id_obat, status_pembayaran } = pembayaran;
 
     const [result] = await db.query(
-      `INSERT INTO statusPembayaran (id_pendaftaran, id_obat, status_pembayaran) 
+      `INSERT INTO statuspembayaran (id_pendaftaran, id_obat, status_pembayaran) 
        VALUES (?, ?, ?)`,
       [id_pendaftaran, id_obat, status_pembayaran]
     );
