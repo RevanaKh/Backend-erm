@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const DokterController = {
   createDokter: async (req, res) => {
     try {
-      const { nama, email, poli, nik, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir } = req.body;
+      const { nama, email, poli, nik, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir, status_pernikahan, golongan_darah, pekerjaan } = req.body;
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'Pengguna sudah ada' });
@@ -22,6 +22,12 @@ const DokterController = {
         tempat_lahir,
         tanggal_lahir,
         role: 'dokter',
+      });
+      await User.createData({
+        user_id: newUser.id,
+        status_pernikahan,
+        golongan_darah,
+        pekerjaan,
       });
       const newDokter = await Dokter.CreateDokter({ user_id: newUser.id, nama, email, poli, password: hashedPassword, role: 'dokter' });
       res.status(201).json({
@@ -50,7 +56,7 @@ const DokterController = {
     try {
       const { id } = req.params;
       const update = await Dokter.updateDokter(id, req.body);
-
+      await Dokter.updateDatadokter(id, req.body);
       if (update.affectedRows === 0) {
         return res.status(404).json({ message: 'Dokter tidak ditemukan' });
       }

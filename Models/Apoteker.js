@@ -40,6 +40,18 @@ class Apoteker {
 
     return result;
   }
+  static async updateDataApoteker(user_id, data) {
+    const { status_pernikahan, golongan_darah, pekerjaan } = data;
+
+    await db.query(
+      `UPDATE data_user 
+     SET status_pernikahan = ?, golongan_darah = ?, pekerjaan = ? 
+     WHERE user_id = ?`,
+      [status_pernikahan, golongan_darah, pekerjaan, user_id]
+    );
+
+    return { user_id, ...data };
+  }
   static async getUserIdFromApotekerId(apotekerId) {
     const [rows] = await db.query(`SELECT user_id FROM apoteker WHERE user_id = ?`, [apotekerId]);
     return rows[0];

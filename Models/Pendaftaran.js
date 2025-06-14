@@ -90,12 +90,18 @@ WHERE p.email = ?
     return rows;
   }
   static async deletePendaftaran(id) {
-    await db.query('DELETE FROM pendaftaran WHERE id = ?', [id]);
+    const [result] = await db.query('DELETE FROM pendaftaran WHERE id = ?', [id]);
+    return result;
   }
   static async getpendaftaranId(pendaftaran_id) {
     const [rows] = await db.query(`SELECT * FROM pemeriksaan WHERE pendaftaran_id = ?`, [pendaftaran_id]);
     return rows;
   }
+  static async deleteAntrian(id) {
+    const [result] = await db.query('DELETE FROM antrianpasien WHERE pendaftaran_id = ?', [id]);
+    return result;
+  }
+
   static async checkPembayaran(id_pendaftaran) {
     const [rows] = await db.query(`SELECT * FROM statuspembayaran WHERE id_pendaftaran = ?`, [id_pendaftaran]);
     return rows;

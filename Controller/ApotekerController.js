@@ -6,7 +6,7 @@ const dataObatModel = require('../Models/DataObat.js');
 const ApotekerController = {
   CreateApoteker: async (req, res) => {
     try {
-      const { nama, email, nik, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir } = req.body;
+      const { nama, email, nik, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir, status_pernikahan, golongan_darah, pekerjaan } = req.body;
 
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
@@ -24,6 +24,12 @@ const ApotekerController = {
         tempat_lahir,
         tanggal_lahir,
         role: 'apoteker',
+      });
+      await User.createData({
+        user_id: newUser.id,
+        status_pernikahan,
+        golongan_darah,
+        pekerjaan,
       });
       const result = await Apoteker.CreateApoteker({
         user_id: newUser.id,
@@ -71,9 +77,8 @@ const ApotekerController = {
       if (!userData) {
         return res.status(404).json({ message: 'Apoteker tidak ditemukan' });
       }
-      console.log(`user id ${user_id}`);
       const { nama, email, nik, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir } = req.body;
-
+      const user_id = userData.user_id;
       const result = await Apoteker.updateApoteker(user_id, {
         nama,
         email,
@@ -83,7 +88,7 @@ const ApotekerController = {
         tempat_lahir,
         tanggal_lahir,
       });
-
+      await Apoteker.updateDataApoteker(user_id, req.body);
       res.status(200).json({
         message: 'Apoteker berhasil diperbarui',
         result,

@@ -5,7 +5,7 @@ const { authMiddleware, adminMiddleware, AdminOrApotekerDokterMiddleware } = req
 
 router.get('/dataobat', authMiddleware, AdminOrApotekerDokterMiddleware, dataObatController.getAllObat);
 router.post('/createobat', authMiddleware, AdminOrApotekerDokterMiddleware, dataObatController.createObat);
-router.put('/:id', authMiddleware, adminMiddleware, dataObatController.updateObat);
-router.delete('/:id', authMiddleware, adminMiddleware, dataObatController.deleteObat);
+router.put('/:id', authMiddleware, AdminOrApotekerDokterMiddleware, dataObatController.updateObat);
+router.delete('/:id', authMiddleware, AdminOrApotekerDokterMiddleware, dataObatController.deleteObat);
 
 module.exports = router;

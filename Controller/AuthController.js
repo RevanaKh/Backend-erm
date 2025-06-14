@@ -5,19 +5,16 @@ const bcrypt = require('bcryptjs');
 const authController = {
   register: async (req, res) => {
     try {
-      const { nama, nik, email, password, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir } = req.body;
+      const { nama, nik, email, password, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir, status_pernikahan, golongan_darah, pekerjaan } = req.body;
 
-      // Check if user exists
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'Pengguna sudah ada' });
       }
 
-      // Hash password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Create user
       const user = await User.create({
         nama,
         nik,
@@ -29,12 +26,18 @@ const authController = {
         tanggal_lahir,
         role: 'pasien',
       });
-
-      // Create token
-      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
+      await User.createData({
+        user_id: user.id,
+        status_pernikahan,
+        golongan_darah,
+        pekerjaan,
+      });
+      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
       res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     } catch (err) {
+      console.error('Gagal Registrasi:', err);
+
       res.status(500).json({ message: err.message });
     }
   },
@@ -43,13 +46,11 @@ const authController = {
     try {
       const { email, password } = req.body;
 
-      // Check if user exists
       const user = await User.findByEmail(email);
       if (!user) {
         return res.status(400).json({ message: 'email atau password salah' });
       }
 
-      // Check password
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(400).json({ message: 'email atau password salah' });
@@ -63,7 +64,7 @@ const authController = {
       if (user.role === 'dokter') {
         payload.poli = user.poli;
       }
-      const token = jwt.sign(payload, process.env.JWT_SECRET || 'your_jwt_secret', {
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
       res.json({
@@ -136,6 +137,7 @@ const authController = {
       }
 
       const user = await User.updateUserid(id, req.body);
+      await User.updateDataUser(id, req.body);
       res.json(user);
     } catch (err) {
       res.status(500).json({ message: err.message });

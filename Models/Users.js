@@ -13,6 +13,11 @@ class Users {
 
     return { id: result.insertId, ...userData };
   }
+  static async createData(userData) {
+    const { user_id, status_pernikahan, golongan_darah, pekerjaan } = userData;
+    const [result] = await db.query('INSERT INTO data_user (user_id , status_pernikahan , golongan_darah , pekerjaan) VALUES (?,?,?,?)', [user_id, status_pernikahan, golongan_darah, pekerjaan]);
+    return { id: result.insertId, ...userData };
+  }
   static async createPasien(pasien) {
     const { nama, nik, email, password, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir, role } = pasien;
 
@@ -45,7 +50,7 @@ class Users {
     return rows;
   }
   static async getuserByid(id) {
-    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+    const [rows] = await db.query('SELECT users.* , data_user.* FROM users JOIN data_user ON users.id = data_user.user_id WHERE users.id = ?', [id]);
     return rows[0];
   }
   static async updateUserid(id, Userdata) {
@@ -70,12 +75,22 @@ class Users {
 
     return { id, ...userData };
   }
+  static async updateDataUser(user_id, data) {
+    const { status_pernikahan, golongan_darah, pekerjaan } = data;
+
+    await db.query(
+      `UPDATE data_user 
+     SET status_pernikahan = ?, golongan_darah = ?, pekerjaan = ? 
+     WHERE user_id = ?`,
+      [status_pernikahan, golongan_darah, pekerjaan, user_id]
+    );
+
+    return { user_id, ...data };
+  }
 
   static async delete(id) {
     await db.query('DELETE FROM users WHERE id = ?', [id]);
     return true;
   }
-  
- 
 }
 module.exports = Users;

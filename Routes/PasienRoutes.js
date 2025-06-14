@@ -13,4 +13,5 @@ router.get('/pembayaranpasien', authMiddleware, PendaftaranController.getStatusP
 router.get('/getpembayaran', authMiddleware, adminMiddleware, PendaftaranController.getPembayaran);
 router.put('/:id', authMiddleware, adminMiddleware, PendaftaranController.UpdateStatusPembayaran);
 router.delete('/:id', authMiddleware, adminMiddleware, PendaftaranController.DeletePendantaran);
+router.delete('/antrian/:id', authMiddleware, PendaftaranController.DeleteAntrian);
 module.exports = router;

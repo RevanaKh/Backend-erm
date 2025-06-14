@@ -1,5 +1,6 @@
 const Pendaftaran = require('../Models/Pendaftaran');
 const db = require('../Config/db.js');
+const User = require('../Models/Users.js');
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -34,7 +35,7 @@ function getTanggalBerikutnya(hari) {
 const PendaftaranController = {
   daftarPasien: async (req, res) => {
     try {
-      const { nama_pasien, poli, keluhan, nik, tanggalLahir, jenisKelamin, alamat, metodePembayaran } = req.body;
+      const { nama_pasien, poli, keluhan, nik, tanggalLahir, jenisKelamin, alamat, metodePembayaran, status_pernikahan, golongan_darah, pekerjaan } = req.body;
       const emailuser = req.user.email;
       const userId = req.user.id;
       const daftarDokter = await Pendaftaran.getDokterByPoli(poli);
@@ -81,7 +82,12 @@ const PendaftaranController = {
         alamat,
         metodePembayaran,
       });
-
+      // await User.createData({
+      //   user_id: userId,
+      //   status_pernikahan,
+      //   golongan_darah,
+      //   pekerjaan,
+      // });
       const pendaftaran_id = result.insertId;
 
       await Pendaftaran.simpanAntrian({
@@ -121,6 +127,20 @@ const PendaftaranController = {
       res.json({ message: 'User deleted successfully' });
     } catch (err) {
       res.status(500).json({ message: err.message });
+    }
+  },
+  DeleteAntrian: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await Pendaftaran.deletePendaftaran(id);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Data antrian tidak ditemukan' });
+      }
+
+      return res.status(200).json({ message: 'Data antrian berhasil dihapus' });
+    } catch (error) {
+      console.error('Error saat menghapus antrian:', error);
+      return res.status(500).json({ message: 'Terjadi kesalahan pada server' });
     }
   },
   getpendaftaran: async (req, res) => {

@@ -15,6 +15,18 @@ class Dokter {
     await db.query(`UPDATE  dokter SET nama = ?, email = ?, poli = ? , role = ?  WHERE user_id = ?`, [nama, email, poli, role, id]);
     return { id, ...dokter };
   }
+  static async updateDatadokter(user_id, data) {
+    const { status_pernikahan, golongan_darah, pekerjaan } = data;
+
+    await db.query(
+      `UPDATE data_user 
+     SET status_pernikahan = ?, golongan_darah = ?, pekerjaan = ? 
+     WHERE user_id = ?`,
+      [status_pernikahan, golongan_darah, pekerjaan, user_id]
+    );
+
+    return { user_id, ...data };
+  }
   static async deleteDokter(id) {
     await db.query(`DELETE FROM users WHERE id = ?`, [id]);
     return true;
@@ -29,13 +41,13 @@ class Dokter {
       throw new Error('Gagal mengambil data dokter');
     }
   }
-   static async checkUserid(id) {
-   const [rows] = await db.query('SELECT * FROM dokter WHERE user_id = ?' ,[id])
-   return rows
+  static async checkUserid(id) {
+    const [rows] = await db.query('SELECT * FROM dokter WHERE user_id = ?', [id]);
+    return rows;
   }
   static async updateDokterPoli(id, dokter) {
     const { poli } = dokter;
-    await db.query(`UPDATE  dokter SET  poli = ?  WHERE user_id = ?`, [ poli ,id]);
+    await db.query(`UPDATE  dokter SET  poli = ?  WHERE user_id = ?`, [poli, id]);
     return { id, ...dokter };
   }
 }
