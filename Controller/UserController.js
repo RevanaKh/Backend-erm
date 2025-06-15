@@ -24,9 +24,21 @@ const userController = {
   updateUser: async (req, res) => {
     try {
       const { id } = req.params;
-      const user = await User.update(id, req.body);
-      await User.updateDataUser(id, req.body);
-      res.json(user);
+      const { nama, nik, email, jenis_kelamin, alamat, tempat_lahir, tanggal_lahir, status_pernikahan, golongan_darah, pekerjaan, role } = req.body;
+      const updatedUser = await User.update(id, {
+        nama,
+        nik,
+        email,
+        jenis_kelamin,
+        alamat,
+        tempat_lahir,
+        tanggal_lahir,
+        status_pernikahan,
+        golongan_darah,
+        pekerjaan,
+        role,
+      });
+      res.json(updatedUser);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
@@ -173,6 +185,130 @@ const userController = {
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: err.message });
+    }
+  },
+
+  ReportFromUser: async (req, res) => {
+    try {
+      const { masalah, pesan } = req.body;
+      const userId = req.user.id;
+      if (!masalah || !pesan) {
+        return res.status(400).json({ message: 'Masalah dan pesan harus diisi.' });
+      }
+
+      const report = await User.Report({
+        user_id: userId,
+        masalah,
+        pesan,
+      });
+      console.log(report);
+      await User.PesanAdmin({
+        id_report: report.id,
+        balasan: 'Terima kasih, laporan Anda berhasil dikirim dan akan segera ditinjau oleh admin.',
+      });
+      res.status(200).json({ status: true, data: report });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: err.message });
+    }
+  },
+
+  getReport: async (req, res) => {
+    try {
+      const report = await User.LihatReport();
+      res.json({ status: true, data: report });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  },
+
+  getPesanFromAdmin: async (req, res) => {
+    try {
+      const id = req.user.id;
+
+      const pesan = await User.LihatPesanAdmin(id);
+
+      res.status(200).json({
+        status: true,
+        message: 'admin mengirim pesan',
+        data: pesan,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        status: false,
+        message: 'Terjadi kesalahan saat mengambil pesan dari admin.',
+      });
+    }
+  },
+  kirimPesanAdmin: async (req, res) => {
+    try {
+      const { id_report, balasan } = req.body;
+
+      if (!id_report || !balasan) {
+        return res.status(400).json({
+          status: false,
+          message: 'ID laporan dan balasan tidak boleh kosong.',
+        });
+      }
+
+      const pesan = await User.PesanAdmin({ id_report, balasan });
+
+      res.status(201).json({
+        status: true,
+        message: 'Pesan berhasil dikirim ke pengguna.',
+        data: pesan,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        status: false,
+        message: 'Terjadi kesalahan saat mengirim pesan ke pengguna.',
+      });
+    }
+  },
+  updatePwEmail: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { email, password } = req.body;
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const updated = await User.EditPwEmail(id, {
+        email,
+        password: hashedPassword,
+      });
+
+      res.status(200).json({
+        status: true,
+        message: 'Email dan password berhasil diperbarui',
+        data: updated,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ status: false, message: err.message });
+    }
+  },
+  getLaporanid: async (req, res) => {
+    try {
+      const id = req.user.id;
+      const laporan = await User.getLaporanid(id);
+      res.json(laporan);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ status: false, message: err.message });
+    }
+  },
+  deleteReport: async (req, res) => {
+    try {
+      const { id } = req.params;
+      await User.DeleteReport(id);
+      res.status(200).json({
+        status: true,
+        message: 'Report berhasil dihapus',
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ status: false, message: err.message });
     }
   },
 };

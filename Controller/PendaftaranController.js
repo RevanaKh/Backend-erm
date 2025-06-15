@@ -225,10 +225,6 @@ const PendaftaranController = {
       const email = req.user.email;
       const pemeriksaan = await Pendaftaran.getPemeriksaanByEmail(email);
 
-      if (!pemeriksaan || pemeriksaan.length === 0) {
-        return res.status(404).json({ message: 'Data pemeriksaan tidak ditemukan.' });
-      }
-
       res.status(200).json({
         status: 'success',
         message: 'Data pemeriksaan berhasil diambil.',
