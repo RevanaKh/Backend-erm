@@ -63,6 +63,7 @@ const userController = {
       await User.delete(id);
       res.json({ message: 'User deleted successfully' });
     } catch (err) {
+      console.log(err);
       res.status(500).json({ message: err.message });
     }
   },
