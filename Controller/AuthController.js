@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../Models/Users.js');
 const bcrypt = require('bcryptjs');
-
+const sendOTPEmail = require('../middleware/sendEmail.js');
+const otpStore = {};
 const authController = {
   register: async (req, res) => {
     try {
@@ -142,6 +143,74 @@ const authController = {
       res.status(500).json({ message: err.message });
     }
   },
+  
+  forgotPassword: async (req,res) => {
+    try {
+
+      const { email } = req.body
+      const user = await User.findByEmail(email);
+      if (!user) {
+        return res.status(400).json({ message: 'email atau password salah' });
+      }
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      otpStore[email] = {
+        otp,
+        expires: Date.now() + 5 * 60 * 1000
+      }
+        await sendOTPEmail(email, otp);
+    res.json({ success: true, message: 'OTP telah dikirim ke email' });
+      } catch (err ) {
+  console.error(err);
+    res.status(500).json({ success: false, message: 'Gagal mengirim email' });
+      }
+  },
+  verifyOtp: async (req,res) => {
+    try {
+       const { email, otp } = req.body;
+  const savedOTP = otpStore[email];
+
+  if (!savedOTP) {
+    return res.status(400).json({ success: false, message: 'OTP tidak ditemukan atau sudah expired' });
+  }
+
+  const isExpired = Date.now() > savedOTP.expires;
+  const isMatch = savedOTP.otp === otp;
+
+  if (isExpired) {
+    delete otpStore[email]; 
+    return res.status(400).json({ success: false, message: 'OTP sudah kadaluarsa' });
+  }
+
+  if (!isMatch) {
+    return res.status(400).json({ success: false, message: 'OTP salah' });
+  }
+
+  return res.json({ success: true, message: 'OTP valid, silakan reset password' });
+    } catch (err) {
+        console.error(err);
+    res.status(500).json({ success: false, message: 'Error' });
+    }
+  },
+  resetPassword: async (req,res) => {
+    try {
+        const { email, password } = req.body;
+
+const user = await User.findByEmail(email);
+      if (!user) {
+        return res.status(400).json({ message: 'email atau password salah' });
+      }
+  const hashedPassword = await bcrypt.hash(password, 10);
+await User.resetpw(email , {
+  password : hashedPassword
+})
+  delete otpStore[email];
+
+  res.json({ success: true, message: 'Password berhasil direset' });
+    } catch (err) {
+         console.error(err);
+    res.status(500).json({ success: false, message: 'Error reset password' });
+    }
+  }
 };
 
 module.exports = authController;

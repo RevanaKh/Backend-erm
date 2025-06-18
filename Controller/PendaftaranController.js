@@ -82,14 +82,15 @@ const PendaftaranController = {
         alamat,
         metodePembayaran,
       });
-      // await User.createData({
-      //   user_id: userId,
-      //   status_pernikahan,
-      //   golongan_darah,
-      //   pekerjaan,
-      // });
+      
       const pendaftaran_id = result.insertId;
-
+await Pendaftaran.dataDaftar({
+  user_id : userId,
+   pendaftaran_id ,
+   status_pernikahan ,
+   golongan_darah ,
+   pekerjaan
+})
       await Pendaftaran.simpanAntrian({
         pendaftaran_id,
         tanggal_pemeriksaan: tanggalPemeriksaan,

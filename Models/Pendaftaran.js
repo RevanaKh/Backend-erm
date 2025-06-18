@@ -18,6 +18,13 @@ class PendaftaranModel {
 
     return result;
   }
+  static async dataDaftar(data) {
+    const {user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan} = data
+    const [result]= await db.query(`INSERT INTO data_daftar (user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan) VALUES (?,?,?,?,?)` ,[user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan]
+    )
+    return result
+  }
+
   static async simpanAntrian(antrian) {
     const { pendaftaran_id, dokter_id, nama_dokter, poli, tanggal_pemeriksaan, no_antrian } = antrian;
     const [result] = await db.query('INSERT INTO antrianpasien (pendaftaran_id, dokter_id, nama_dokter, poli, tanggal_pemeriksaan, no_antrian) VALUES (?, ?, ?, ?, ?, ?)', [

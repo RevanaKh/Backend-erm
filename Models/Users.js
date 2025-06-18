@@ -137,5 +137,16 @@ class Users {
     await db.query('DELETE FROM users WHERE id = ?', [id]);
     return true;
   }
+  static async resetpw(email, userPassword) {
+  const { password } = userPassword;
+
+  await db.query(
+    `UPDATE users SET password = ? WHERE email = ?`,
+    [password, email]
+  );
+
+  return { email, ...userPassword };
+}
+
 }
 module.exports = Users;
