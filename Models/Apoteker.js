@@ -14,7 +14,7 @@ class Apoteker {
   }
 
   static async getApoteker() {
-    const [rows] = await db.query('SELECT id ,nama , email , role FROM users WHERE role = ?', ['apoteker']);
+    const [rows] = await db.query('SELECT users.* , data_user.* FROM users JOIN data_user ON users.id = data_user.user_id WHERE role = ?', ['apoteker']);
     return rows;
   }
   static async deleteApoteker(id) {
@@ -59,17 +59,18 @@ class Apoteker {
   static async getPemeriksaanSelesai() {
     const [rows] = await db.query(
       `SELECT 
-  pemeriksaan.*, 
-  pendaftaran.nama_pasien, 
-  pendaftaran.keluhan,
-  dokter.nama AS nama_dokter,
-  dataobat.nama_obat,
-  dataobat.harga_jual
-FROM pemeriksaan
-JOIN pendaftaran ON pemeriksaan.pendaftaran_id = pendaftaran.id
-LEFT JOIN dokter ON pemeriksaan.dokter_id = dokter.id
-LEFT JOIN dataobat ON pemeriksaan.id_obat = dataobat.id
-WHERE pemeriksaan.status_pemeriksaan = 'selesai' `
+      pemeriksaan.*, 
+      pendaftaran.*, 
+      data_daftar.*, 
+      dokter.nama AS nama_dokter,
+      dataobat.nama_obat,
+      dataobat.harga_jual
+    FROM pemeriksaan
+    JOIN pendaftaran ON pendaftaran.id = pemeriksaan.pendaftaran_id
+    LEFT JOIN dokter ON pendaftaran.dokter_id = dokter.id
+    LEFT JOIN dataobat ON pemeriksaan.id_obat = dataobat.id
+    LEFT JOIN data_daftar ON pendaftaran.id = data_daftar.pendaftaran_id
+    WHERE pemeriksaan.status_pemeriksaan = 'selesai'`
     );
     return rows;
   }

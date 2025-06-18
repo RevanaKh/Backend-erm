@@ -19,10 +19,9 @@ class PendaftaranModel {
     return result;
   }
   static async dataDaftar(data) {
-    const {user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan} = data
-    const [result]= await db.query(`INSERT INTO data_daftar (user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan) VALUES (?,?,?,?,?)` ,[user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan]
-    )
-    return result
+    const { user_id, pendaftaran_id, status_pernikahan, golongan_darah, pekerjaan } = data;
+    const [result] = await db.query(`INSERT INTO data_daftar (user_id , pendaftaran_id ,status_pernikahan , golongan_darah ,pekerjaan) VALUES (?,?,?,?,?)`, [user_id, pendaftaran_id, status_pernikahan, golongan_darah, pekerjaan]);
+    return result;
   }
 
   static async simpanAntrian(antrian) {
@@ -56,10 +55,11 @@ WHERE p.email = ?
   static async getpasienbypoli(poli) {
     const [rows] = await db.query(
       `
-    SELECT pendaftaran.*, antrianpasien.no_antrian, pemeriksaan.status_pemeriksaan , pemeriksaan.pendaftaran_id
+    SELECT pendaftaran.*, antrianpasien.no_antrian, pemeriksaan.status_pemeriksaan , pemeriksaan.pendaftaran_id , data_daftar.*
     FROM pendaftaran
     JOIN antrianpasien ON pendaftaran.id = antrianpasien.pendaftaran_id
     LEFT JOIN pemeriksaan ON pendaftaran.id = pemeriksaan.pendaftaran_id
+    LEFT JOIN data_daftar ON pendaftaran.id = data_daftar.pendaftaran_id
     WHERE pendaftaran.poli = ?
     `,
       [poli]
@@ -121,12 +121,14 @@ WHERE p.email = ?
     const [rows] = await db.query(
       `SELECT 
       pemeriksaan.*, 
-      pendaftaran.*, 
+      pendaftaran.id, 
       antrianpasien.tanggal_pemeriksaan, 
-      antrianpasien.nama_dokter 
+      antrianpasien.nama_dokter ,
+      dataobat.nama_obat
     FROM pendaftaran 
     JOIN pemeriksaan ON pendaftaran.id = pemeriksaan.pendaftaran_id 
     LEFT JOIN antrianpasien ON pendaftaran.id = antrianpasien.pendaftaran_id 
+    LEFT JOIN dataobat ON pemeriksaan.id_obat = dataobat.id
     WHERE pendaftaran.email = ?`,
       [email]
     );

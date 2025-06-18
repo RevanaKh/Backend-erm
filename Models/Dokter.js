@@ -33,7 +33,14 @@ class Dokter {
   }
   static async GetAllDokter() {
     try {
-      const query = `SELECT id, nama, email, poli, role, user_id FROM dokter`;
+      const query = `SELECT 
+  users.*, 
+  dokter.*, 
+  data_user.* 
+FROM users
+JOIN dokter ON dokter.user_id = users.id
+JOIN data_user ON users.id = data_user.user_id;
+`;
       const [rows] = await db.query(query);
       return rows;
     } catch (error) {
