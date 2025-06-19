@@ -36,9 +36,9 @@ class Dokter {
       const query = `SELECT 
   users.*, 
   dokter.*, 
-  data_user.* 
-FROM users
-JOIN dokter ON dokter.user_id = users.id
+  data_user.user_id , data_user.status_pernikahan , data_user.golongan_darah , data_user.pekerjaan
+FROM dokter
+JOIN users ON  dokter.user_id = users.id
 JOIN data_user ON users.id = data_user.user_id;
 `;
       const [rows] = await db.query(query);

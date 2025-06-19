@@ -26,7 +26,6 @@ const JadwalController = {
   createJadwal: async (req, res) => {
     try {
       const { id_dokter, hari, jam_mulai, jam_selesai, status } = req.body;
-
       if (!hari || !jam_mulai || !jam_selesai) {
         return res.status(400).json({ message: 'Semua field wajib diisi.' });
       }
